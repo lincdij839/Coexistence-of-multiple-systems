@@ -6,7 +6,7 @@ Architecture: all
 Depends: bash (>= 4.0)
 Recommends: lxd (>= 5.0) | snapd
 Maintainer: Yuan <yuan@example.com>
-Homepage: https://github.com/yourusername/lxd-multi-system
+Homepage: https://github.com/lincdij839/Coexistence-of-multiple-systems
 Description: LXD 多系统容器管理工具
  提供便捷的 LXD 容器管理，包括：
  .

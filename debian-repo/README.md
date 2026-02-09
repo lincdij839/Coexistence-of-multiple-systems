@@ -4,7 +4,7 @@
 
 ```bash
 # 添加仓库
-echo "deb [trusted=yes] https://yourusername.github.io/lxd-multi-system/debian-repo stable main" | sudo tee /etc/apt/sources.list.d/multi-system.list
+echo "deb [trusted=yes] https://lincdij839.github.io/Coexistence-of-multiple-systems/debian-repo stable main" | sudo tee /etc/apt/sources.list.d/multi-system.list
 
 # 更新并安装
 sudo apt update

@@ -2,15 +2,30 @@
 
 一键安装，支持所有 Linux 发行版的容器管理系统。
 
-## 🚀 快速安装（一键完成，效果等同 apt install）
+## 🚀 快速安装
+
+### 方法 1: APT 仓库（推荐）
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yourusername/lxd-multi-system/main/online-install.sh | sudo bash
+# 添加仓库
+echo "deb [trusted=yes] https://lincdij839.github.io/Coexistence-of-multiple-systems/debian-repo stable main" | sudo tee /etc/apt/sources.list.d/multi-system.list
+
+# 安装
+sudo apt update
+sudo apt install multi-system
+
+# 初始化
 newgrp lxd
 multi-system-setup
 ```
 
-> **注意**: 虽然不是 `apt install multi-system`，但在线安装脚本提供了相同的便利性，并且支持所有 Linux 发行版。详见 [QUICK-INSTALL.md](QUICK-INSTALL.md)
+### 方法 2: 在线安装脚本
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/lincdij839/Coexistence-of-multiple-systems/main/online-install.sh | sudo bash
+newgrp lxd
+multi-system-setup
+```
 
 ## 📦 包含内容
 
@@ -77,7 +92,11 @@ lxc exec my-arch -- bash /usr/local/share/lxd-multi-system/install-arch-tools
 ## 🗑️ 卸载
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/yourusername/lxd-multi-system/main/uninstall.sh | sudo bash
+# 使用 apt
+sudo apt remove multi-system
+
+# 或使用卸载脚本
+curl -fsSL https://raw.githubusercontent.com/lincdij839/Coexistence-of-multiple-systems/main/uninstall.sh | sudo bash
 ```
 
 ## 🌟 特性
@@ -97,5 +116,6 @@ MIT License
 
 ## 🔗 相关链接
 
-- 项目仓库: https://github.com/yourusername/lxd-multi-system
+- 项目仓库: https://github.com/lincdij839/Coexistence-of-multiple-systems
+- APT 仓库: https://lincdij839.github.io/Coexistence-of-multiple-systems/debian-repo
 - LXD 文档: https://documentation.ubuntu.com/lxd/
