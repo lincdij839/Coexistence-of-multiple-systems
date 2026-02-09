@@ -4,7 +4,7 @@ Architecture: all
 Maintainer: Yuan <yuan@example.com>
 Depends: bash (>= 4.0)
 Recommends: lxd (>= 5.0) | snapd
-Filename: debian-repo/pool/main/multi-system_1.0.0.deb
+Filename: pool/main/multi-system_1.0.0.deb
 Size: 13594
 MD5sum: 575a7e96662a20a6602a5f1aacfc7e8c
 SHA1: 4a9424d378a5f7823fb3672e5270beb9858f9ef4
