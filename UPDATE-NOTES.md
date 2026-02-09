@@ -1,6 +1,23 @@
 # 更新说明
 
-## v1.0.0 - 新终端窗口支持
+## v1.0.0 - 新终端窗口支持（已修复）
+
+### ✅ 已修复问题
+
+- ✅ 修复了 `dbus-launch` 缺失错误
+- ✅ 添加了 DISPLAY 和 WAYLAND_DISPLAY 检测
+- ✅ 添加了错误输出重定向（2>/dev/null）
+- ✅ 添加了更好的错误处理和回退机制
+- ✅ 支持更多终端模拟器（mate-terminal, lxterminal）
+- ✅ 为每个容器添加了自定义窗口标题
+
+### 依赖包
+
+如果遇到 `dbus-launch` 错误，安装以下包：
+
+```bash
+sudo apt install dbus-x11
+```
 
 ### 新功能
 
@@ -10,12 +27,22 @@
 
 脚本会自动检测并使用以下终端模拟器（按优先级）：
 
-1. **gnome-terminal** - GNOME 默认终端
-2. **konsole** - KDE 默认终端
-3. **xfce4-terminal** - XFCE 默认终端
-4. **xterm** - 通用 X 终端
-5. **tilix** - 平铺式终端
-6. **terminator** - 多窗口终端
+1. **gnome-terminal** - GNOME 默认终端（带标题）
+2. **konsole** - KDE 默认终端（带标题）
+3. **xfce4-terminal** - XFCE 默认终端（带标题）
+4. **xterm** - 通用 X 终端（带标题）
+5. **tilix** - 平铺式终端（带标题）
+6. **terminator** - 多窗口终端（带标题）
+7. **mate-terminal** - MATE 默认终端（带标题）
+8. **lxterminal** - LXDE 默认终端（带标题）
+
+### 窗口标题
+
+每个容器都有自定义的窗口标题：
+- my-arch → "Arch Linux Container"
+- my-debian → "Debian Container"
+- my-fedora → "Fedora Container"
+- my-kali → "Kali Linux Container"
 
 ### 使用方法
 
@@ -52,6 +79,9 @@ sudo chmod +x /usr/local/bin/my-*
 # 卸载旧版本
 sudo apt remove multi-system
 
+# 清除缓存
+sudo rm -rf /var/lib/apt/lists/lincdij839*
+
 # 安装新版本
 sudo apt update
 sudo apt install multi-system
@@ -62,7 +92,7 @@ sudo apt install multi-system
 运行以下命令测试新功能：
 
 ```bash
-my-arch
+my-kali
 ```
 
-应该会打开一个新的终端窗口并进入 Arch Linux 容器。
+应该会打开一个新的终端窗口（标题为 "Kali Linux Container"）并进入 Kali Linux 容器。
