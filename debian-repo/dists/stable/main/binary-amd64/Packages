@@ -5,13 +5,13 @@ Maintainer: Yuan <yuan@example.com>
 Depends: bash (>= 4.0)
 Recommends: lxd (>= 5.0) | snapd
 Filename: pool/main/multi-system_1.0.0.deb
-Size: 13594
-MD5sum: 575a7e96662a20a6602a5f1aacfc7e8c
-SHA1: 4a9424d378a5f7823fb3672e5270beb9858f9ef4
-SHA256: c47a7f0c69c86288275756b6346c4a71f223420c41ea56e42ef628c3684e2e77
+Size: 14038
+MD5sum: 75769a889d437824cd9e5b678aed380a
+SHA1: 05f2bf2cdf18f02065ae16a81ccf943296ba0534
+SHA256: 9bc6c19373b9849f84ccbb49c95e769d3148cf9c75bf821451ad21c611dfbd1a
 Section: utils
 Priority: optional
-Homepage: https://github.com/yourusername/lxd-multi-system
+Homepage: https://github.com/lincdij839/Coexistence-of-multiple-systems
 Description: LXD 多系统容器管理工具
  提供便捷的 LXD 容器管理，包括：
  .

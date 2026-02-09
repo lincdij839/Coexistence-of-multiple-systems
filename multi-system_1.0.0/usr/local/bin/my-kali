@@ -1,5 +1,52 @@
 #!/bin/bash
 
-# 进入 my-kali 容器
-echo "正在进入容器: my-kali"
-lxc exec my-kali -- /bin/bash
+# 检测可用的终端模拟器
+detect_terminal() {
+    if command -v gnome-terminal &>/dev/null; then
+        echo "gnome-terminal"
+    elif command -v konsole &>/dev/null; then
+        echo "konsole"
+    elif command -v xfce4-terminal &>/dev/null; then
+        echo "xfce4-terminal"
+    elif command -v xterm &>/dev/null; then
+        echo "xterm"
+    elif command -v tilix &>/dev/null; then
+        echo "tilix"
+    elif command -v terminator &>/dev/null; then
+        echo "terminator"
+    else
+        echo "none"
+    fi
+}
+
+# 在新终端中打开容器
+TERMINAL=$(detect_terminal)
+
+if [ "$TERMINAL" = "none" ]; then
+    # 如果没有图形终端，直接在当前终端运行
+    echo "正在进入容器: my-kali"
+    lxc exec my-kali -- /bin/bash
+else
+    # 在新终端窗口中打开
+    case "$TERMINAL" in
+        gnome-terminal)
+            gnome-terminal -- bash -c "echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash" &
+            ;;
+        konsole)
+            konsole -e bash -c "echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash" &
+            ;;
+        xfce4-terminal)
+            xfce4-terminal -e "bash -c \"echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash\"" &
+            ;;
+        tilix)
+            tilix -e "bash -c \"echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash\"" &
+            ;;
+        terminator)
+            terminator -e "bash -c \"echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash\"" &
+            ;;
+        xterm)
+            xterm -e bash -c "echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash" &
+            ;;
+    esac
+    echo "已在新终端窗口中打开 my-kali 容器"
+fi
