@@ -2,6 +2,12 @@
 
 # 检测可用的终端模拟器
 detect_terminal() {
+    # 检查是否在图形环境中
+    if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ]; then
+        echo "none"
+        return
+    fi
+    
     if command -v gnome-terminal &>/dev/null; then
         echo "gnome-terminal"
     elif command -v konsole &>/dev/null; then
@@ -14,6 +20,10 @@ detect_terminal() {
         echo "tilix"
     elif command -v terminator &>/dev/null; then
         echo "terminator"
+    elif command -v mate-terminal &>/dev/null; then
+        echo "mate-terminal"
+    elif command -v lxterminal &>/dev/null; then
+        echo "lxterminal"
     else
         echo "none"
     fi
@@ -30,23 +40,35 @@ else
     # 在新终端窗口中打开
     case "$TERMINAL" in
         gnome-terminal)
-            gnome-terminal -- bash -c "echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash" &
+            gnome-terminal --title="Fedora Container" -- bash -c "echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash" 2>/dev/null &
             ;;
         konsole)
-            konsole -e bash -c "echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash" &
+            konsole --title "Fedora Container" -e bash -c "echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash" 2>/dev/null &
             ;;
         xfce4-terminal)
-            xfce4-terminal -e "bash -c \"echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash\"" &
+            xfce4-terminal --title="Fedora Container" -e "bash -c \"echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash\"" 2>/dev/null &
             ;;
         tilix)
-            tilix -e "bash -c \"echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash\"" &
+            tilix --title="Fedora Container" -e "bash -c \"echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash\"" 2>/dev/null &
             ;;
         terminator)
-            terminator -e "bash -c \"echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash\"" &
+            terminator --title="Fedora Container" -e "bash -c \"echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash\"" 2>/dev/null &
+            ;;
+        mate-terminal)
+            mate-terminal --title="Fedora Container" -e "bash -c \"echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash\"" 2>/dev/null &
+            ;;
+        lxterminal)
+            lxterminal --title="Fedora Container" -e "bash -c \"echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash\"" 2>/dev/null &
             ;;
         xterm)
-            xterm -e bash -c "echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash" &
+            xterm -title "Fedora Container" -e bash -c "echo '正在进入容器: my-fedora'; lxc exec my-fedora -- /bin/bash" 2>/dev/null &
             ;;
     esac
-    echo "已在新终端窗口中打开 my-fedora 容器"
+    
+    if [ $? -eq 0 ]; then
+        echo "✓ 已在新终端窗口中打开 my-fedora 容器"
+    else
+        echo "✗ 打开新终端失败，在当前终端运行"
+        lxc exec my-fedora -- /bin/bash
+    fi
 fi

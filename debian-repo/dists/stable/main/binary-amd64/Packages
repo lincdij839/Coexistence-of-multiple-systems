@@ -5,10 +5,10 @@ Maintainer: Yuan <yuan@example.com>
 Depends: bash (>= 4.0)
 Recommends: lxd (>= 5.0) | snapd
 Filename: pool/main/multi-system_1.0.0.deb
-Size: 14038
-MD5sum: 75769a889d437824cd9e5b678aed380a
-SHA1: 05f2bf2cdf18f02065ae16a81ccf943296ba0534
-SHA256: 9bc6c19373b9849f84ccbb49c95e769d3148cf9c75bf821451ad21c611dfbd1a
+Size: 14242
+MD5sum: 0bfe8d9d6f5b1ae9a7011f70e2ca2f6f
+SHA1: 871f84a551062d430f500e77c66380fe6f213086
+SHA256: 8b63888b5e11842b90fe57dc21daeea98c8d72c6ba1d734a4afef5eced4e8409
 Section: utils
 Priority: optional
 Homepage: https://github.com/lincdij839/Coexistence-of-multiple-systems
