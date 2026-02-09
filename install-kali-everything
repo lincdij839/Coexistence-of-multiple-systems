@@ -1,0 +1,166 @@
+#!/bin/bash
+
+# Kali Linux 完整工具集安装脚本
+# 类似于 BlackArch 的安装方式
+
+echo "========================================"
+echo "  Kali Linux 2025.4 完整工具集安装"
+echo "========================================"
+echo ""
+
+# 检查是否在 Kali 容器中
+if ! grep -q "kali" /etc/os-release 2>/dev/null; then
+    echo "❌ 错误: 此脚本只能在 Kali Linux 中运行"
+    echo "请使用: lxc exec my-kali -- bash /usr/local/share/lxd-multi-system/install-kali-everything"
+    exit 1
+fi
+
+# 检查是否为 root
+if [ "$EUID" -ne 0 ]; then
+    echo "❌ 请使用 root 权限运行此脚本"
+    exit 1
+fi
+
+echo "【1/5】更新系统和软件源..."
+apt update
+apt upgrade -y
+
+echo ""
+echo "【2/5】确保 Kali 仓库配置正确..."
+
+# 备份原有 sources.list
+cp /etc/apt/sources.list /etc/apt/sources.list.backup
+
+# 配置 Kali 官方仓库（2025.4）
+cat > /etc/apt/sources.list << 'EOF'
+# Kali Linux 官方仓库
+deb http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware
+
+# Kali 源代码仓库（可选）
+# deb-src http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware
+EOF
+
+echo "✓ Kali 仓库配置完成"
+
+echo ""
+echo "【3/5】更新软件包列表..."
+apt update
+
+echo ""
+echo "【4/5】安装 Kali 元包管理器..."
+
+# 设置非交互模式
+export DEBIAN_FRONTEND=noninteractive
+
+# 预配置 tripwire 和 isc-dhcp-server 避免交互式提示
+echo "tripwire tripwire/site-passphrase password kali2025" | debconf-set-selections
+echo "tripwire tripwire/site-passphrase-again password kali2025" | debconf-set-selections
+echo "tripwire tripwire/local-passphrase password kali2025" | debconf-set-selections
+echo "tripwire tripwire/local-passphrase-again password kali2025" | debconf-set-selections
+echo "tripwire tripwire/use-localkey boolean true" | debconf-set-selections
+echo "tripwire tripwire/use-sitekey boolean true" | debconf-set-selections
+echo "isc-dhcp-server isc-dhcp-server/interfaces string" | debconf-set-selections
+
+apt install -y kali-linux-everything 2>&1 | tee /tmp/kali-install.log || {
+    echo ""
+    echo "⚠️  kali-linux-everything 安装失败，尝试分步安装..."
+    
+    # 如果完整安装失败，尝试分类安装
+    echo ""
+    echo "正在安装 Kali 工具集（分类安装）..."
+    
+    # 核心工具
+    echo "  → 安装核心工具..."
+    apt install -y kali-linux-core
+    
+    # 默认工具集
+    echo "  → 安装默认工具集..."
+    apt install -y kali-linux-default
+    
+    # 大型工具集
+    echo "  → 安装大型工具集..."
+    apt install -y kali-linux-large
+    
+    # 各类别工具
+    echo "  → 安装信息收集工具..."
+    apt install -y kali-tools-information-gathering
+    
+    echo "  → 安装漏洞分析工具..."
+    apt install -y kali-tools-vulnerability
+    
+    echo "  → 安装 Web 应用工具..."
+    apt install -y kali-tools-web
+    
+    echo "  → 安装密码攻击工具..."
+    apt install -y kali-tools-passwords
+    
+    echo "  → 安装无线攻击工具..."
+    apt install -y kali-tools-wireless
+    
+    echo "  → 安装逆向工程工具..."
+    apt install -y kali-tools-reverse-engineering
+    
+    echo "  → 安装漏洞利用工具..."
+    apt install -y kali-tools-exploitation
+    
+    echo "  → 安装社会工程学工具..."
+    apt install -y kali-tools-social-engineering
+    
+    echo "  → 安装嗅探/欺骗工具..."
+    apt install -y kali-tools-sniffing-spoofing
+    
+    echo "  → 安装后渗透工具..."
+    apt install -y kali-tools-post-exploitation
+    
+    echo "  → 安装取证工具..."
+    apt install -y kali-tools-forensics
+    
+    echo "  → 安装报告工具..."
+    apt install -y kali-tools-reporting
+    
+    echo "  → 安装硬件黑客工具..."
+    apt install -y kali-tools-hardware
+    
+    echo "  → 安装加密/隐写工具..."
+    apt install -y kali-tools-crypto-stego
+    
+    echo "  → 安装模糊测试工具..."
+    apt install -y kali-tools-fuzzing
+    
+    echo "  → 安装数据库工具..."
+    apt install -y kali-tools-database
+    
+    echo "  → 安装 RFID/NFC 工具..."
+    apt install -y kali-tools-rfid
+    
+    echo "  → 安装 SDR 工具..."
+    apt install -y kali-tools-sdr
+    
+    echo "  → 安装 VoIP 工具..."
+    apt install -y kali-tools-voip
+    
+    echo "  → 安装 Windows 资源..."
+    apt install -y kali-tools-windows-resources
+}
+
+echo ""
+echo "【5/5】清理和优化..."
+apt autoremove -y
+apt clean
+
+echo ""
+echo "========================================"
+echo "  ✓ Kali 工具集安装完成！"
+echo "========================================"
+echo ""
+echo "已安装的 Kali 元包："
+dpkg -l | grep "^ii.*kali-" | awk '{print "  - " $2}'
+echo ""
+echo "查看所有可用工具："
+echo "  apt search kali-tools-"
+echo ""
+echo "查看已安装工具："
+echo "  dpkg -l | grep kali"
+echo ""
+echo "安装日志: /tmp/kali-install.log"
+echo ""

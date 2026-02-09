@@ -40,35 +40,30 @@ else
     # 在新终端窗口中打开
     case "$TERMINAL" in
         gnome-terminal)
-            gnome-terminal --title="Kali Linux Container" -- bash -c "echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash" 2>/dev/null &
+            gnome-terminal --title="Kali Linux Container" -- bash -c "lxc exec my-kali -- /bin/bash" 2>/dev/null &
             ;;
         konsole)
-            konsole --title "Kali Linux Container" -e bash -c "echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash" 2>/dev/null &
+            konsole --title "Kali Linux Container" -e bash -c "lxc exec my-kali -- /bin/bash" 2>/dev/null &
             ;;
         xfce4-terminal)
-            xfce4-terminal --title="Kali Linux Container" -e "bash -c \"echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash\"" 2>/dev/null &
+            xfce4-terminal --title="Kali Linux Container" -e "bash -c \"lxc exec my-kali -- /bin/bash\"" 2>/dev/null &
             ;;
         tilix)
-            tilix --title="Kali Linux Container" -e "bash -c \"echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash\"" 2>/dev/null &
+            tilix --title="Kali Linux Container" -e "bash -c \"lxc exec my-kali -- /bin/bash\"" 2>/dev/null &
             ;;
         terminator)
-            terminator --title="Kali Linux Container" -e "bash -c \"echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash\"" 2>/dev/null &
+            terminator --title="Kali Linux Container" -e "bash -c \"lxc exec my-kali -- /bin/bash\"" 2>/dev/null &
             ;;
         mate-terminal)
-            mate-terminal --title="Kali Linux Container" -e "bash -c \"echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash\"" 2>/dev/null &
+            mate-terminal --title="Kali Linux Container" -e "bash -c \"lxc exec my-kali -- /bin/bash\"" 2>/dev/null &
             ;;
         lxterminal)
-            lxterminal --title="Kali Linux Container" -e "bash -c \"echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash\"" 2>/dev/null &
+            lxterminal --title="Kali Linux Container" -e "bash -c \"lxc exec my-kali -- /bin/bash\"" 2>/dev/null &
             ;;
         xterm)
-            xterm -title "Kali Linux Container" -e bash -c "echo '正在进入容器: my-kali'; lxc exec my-kali -- /bin/bash" 2>/dev/null &
+            xterm -title "Kali Linux Container" -e bash -c "lxc exec my-kali -- /bin/bash" 2>/dev/null &
             ;;
     esac
     
-    if [ $? -eq 0 ]; then
-        echo "✓ 已在新终端窗口中打开 my-kali 容器"
-    else
-        echo "✗ 打开新终端失败，在当前终端运行"
-        lxc exec my-kali -- /bin/bash
-    fi
+    echo "✓ 已在新终端窗口中打开 my-kali 容器"
 fi

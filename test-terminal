@@ -1,0 +1,72 @@
+#!/bin/bash
+
+echo "测试终端检测..."
+echo ""
+
+# 检查图形环境
+echo "DISPLAY: $DISPLAY"
+echo "WAYLAND_DISPLAY: $WAYLAND_DISPLAY"
+echo ""
+
+# 检查可用的终端
+echo "检查可用的终端模拟器："
+for term in gnome-terminal konsole xfce4-terminal xterm tilix terminator mate-terminal lxterminal; do
+    if command -v $term &>/dev/null; then
+        echo "  ✓ $term ($(which $term))"
+    else
+        echo "  ✗ $term (未安装)"
+    fi
+done
+
+echo ""
+echo "检查 dbus-launch:"
+if command -v dbus-launch &>/dev/null; then
+    echo "  ✓ dbus-launch ($(which dbus-launch))"
+else
+    echo "  ✗ dbus-launch (未安装)"
+fi
+
+echo ""
+echo "测试打开新终端窗口..."
+
+# 检测终端
+if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ]; then
+    echo "❌ 未检测到图形环境"
+    exit 1
+fi
+
+TERMINAL=""
+if command -v gnome-terminal &>/dev/null; then
+    TERMINAL="gnome-terminal"
+elif command -v konsole &>/dev/null; then
+    TERMINAL="konsole"
+elif command -v xfce4-terminal &>/dev/null; then
+    TERMINAL="xfce4-terminal"
+elif command -v xterm &>/dev/null; then
+    TERMINAL="xterm"
+fi
+
+if [ -z "$TERMINAL" ]; then
+    echo "❌ 未找到可用的终端模拟器"
+    exit 1
+fi
+
+echo "使用终端: $TERMINAL"
+echo "尝试打开新窗口..."
+
+case "$TERMINAL" in
+    gnome-terminal)
+        gnome-terminal -- bash -c "echo '测试成功！按 Enter 关闭...'; read" 2>/dev/null &
+        ;;
+    konsole)
+        konsole -e bash -c "echo '测试成功！按 Enter 关闭...'; read" 2>/dev/null &
+        ;;
+    xfce4-terminal)
+        xfce4-terminal -e "bash -c \"echo '测试成功！按 Enter 关闭...'; read\"" 2>/dev/null &
+        ;;
+    xterm)
+        xterm -e bash -c "echo '测试成功！按 Enter 关闭...'; read" 2>/dev/null &
+        ;;
+esac
+
+echo "✓ 新终端窗口已打开"

@@ -1,0 +1,188 @@
+#!/bin/bash
+
+# Debian 完整开发工具集安装脚本
+# 包含所有开发、安全、网络工具
+
+echo "========================================"
+echo "  Debian 完整工具集安装"
+echo "========================================"
+echo ""
+
+# 检查是否在 Debian 容器中
+if ! grep -q "debian" /etc/os-release 2>/dev/null; then
+    echo "❌ 错误: 此脚本只能在 Debian 中运行"
+    echo "请使用: lxc exec my-debian -- bash /usr/local/share/lxd-multi-system/install-debian-everything"
+    exit 1
+fi
+
+# 检查是否为 root
+if [ "$EUID" -ne 0 ]; then
+    echo "❌ 请使用 root 权限运行此脚本"
+    exit 1
+fi
+
+# 设置非交互模式
+export DEBIAN_FRONTEND=noninteractive
+
+echo "【1/8】更新系统..."
+apt update
+apt upgrade -y
+
+echo ""
+echo "【2/8】安装开发工具..."
+apt install -y build-essential
+apt install -y autoconf automake libtool
+apt install -y cmake ninja-build meson
+apt install -y pkg-config
+apt install -y gdb valgrind strace ltrace
+
+echo ""
+echo "【3/8】安装编程语言和运行时..."
+# Python 全家桶
+apt install -y python3 python3-pip python3-dev python3-venv python3-setuptools
+apt install -y python3-numpy python3-scipy python3-pandas python3-matplotlib
+apt install -y python3-requests python3-flask python3-django
+apt install -y ipython3 jupyter-notebook
+
+# Node.js (从 NodeSource 安装最新版)
+curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
+apt install -y nodejs
+npm install -g yarn typescript ts-node @types/node
+npm install -g webpack webpack-cli babel-cli
+npm install -g eslint prettier
+
+# Java
+apt install -y default-jdk maven gradle
+
+# Go
+apt install -y golang-go
+
+# Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source $HOME/.cargo/env
+
+# Ruby
+apt install -y ruby-full ruby-dev
+gem install bundler rails
+
+# PHP
+apt install -y php php-cli php-mysqlnd php-pdo php-gd php-mbstring php-xml php-json php-curl
+apt install -y composer
+
+# Perl
+apt install -y perl libperl-dev
+
+echo ""
+echo "【4/8】安装数据库..."
+apt install -y mariadb-server mariadb-client
+apt install -y postgresql postgresql-contrib
+apt install -y redis-server
+apt install -y sqlite3
+
+echo ""
+echo "【5/8】安装 Web 服务器..."
+apt install -y nginx
+apt install -y apache2
+apt install -y lighttpd
+
+echo ""
+echo "【6/8】安装网络和安全工具..."
+# 网络工具
+apt install -y nmap wireshark tcpdump netcat-openbsd socat
+apt install -y net-tools dnsutils traceroute mtr-tiny
+apt install -y iftop nethogs iptraf-ng
+apt install -y curl wget aria2 axel
+
+# 安全工具
+apt install -y openssl gnutls-bin
+apt install -y john hydra aircrack-ng
+apt install -y nikto sqlmap
+apt install -y lynis rkhunter chkrootkit
+apt install -y fail2ban aide tripwire
+
+# 渗透测试工具
+apt install -y burpsuite zaproxy
+apt install -y ettercap-graphical bettercap
+apt install -y hashcat hashcat-data
+
+# 密码破解工具
+apt install -y ophcrack ophcrack-cli
+apt install -y medusa ncrack
+
+# Web 扫描工具
+apt install -y wpscan dirb dirbuster
+apt install -y whatweb wafw00f
+
+# 漏洞扫描
+apt install -y openvas
+apt install -y nikto skipfish
+
+echo ""
+echo "【7/8】安装系统工具..."
+# 版本控制
+apt install -y git git-lfs subversion mercurial
+
+# 容器和虚拟化
+apt install -y docker.io docker-compose
+apt install -y podman buildah skopeo
+
+# 监控工具
+apt install -y htop glances atop
+apt install -y sysstat dstat iotop
+apt install -y nagios-plugins-basic collectd
+
+# 文本编辑器
+apt install -y vim neovim emacs nano
+
+# 终端工具
+apt install -y tmux screen byobu
+apt install -y zsh fish
+apt install -y fzf ripgrep fd-find bat
+
+# 压缩工具
+apt install -y zip unzip p7zip-full p7zip-rar
+apt install -y tar gzip bzip2 xz-utils
+
+# 其他实用工具
+apt install -y tree jq
+apt install -y lsof
+apt install -y ansible terraform
+
+# 逆向工程工具
+apt install -y radare2 ghidra
+apt install -y binwalk foremost
+apt install -y hexedit bless
+
+# 取证工具
+apt install -y autopsy sleuthkit
+apt install -y volatility3
+apt install -y scalpel testdisk
+
+echo ""
+echo "【8/8】清理和优化..."
+apt autoremove -y
+apt clean
+
+echo ""
+echo "========================================"
+echo "  ✓ Debian 完整工具集安装完成！"
+echo "========================================"
+echo ""
+echo "已安装的主要工具类别："
+echo "  - 开发工具 (gcc, make, cmake 等)"
+echo "  - 编程语言 (Python, Node.js, Java, Go, Rust, Ruby, PHP)"
+echo "  - 数据库 (MariaDB, PostgreSQL, Redis, SQLite)"
+echo "  - Web 服务器 (Nginx, Apache, Lighttpd)"
+echo "  - 网络工具 (nmap, wireshark, tcpdump 等)"
+echo "  - 安全工具 (john, hydra, burpsuite, sqlmap 等)"
+echo "  - 渗透测试 (metasploit, ettercap, hashcat 等)"
+echo "  - 版本控制 (git, svn, mercurial)"
+echo "  - 容器工具 (docker, podman, buildah)"
+echo "  - 监控工具 (htop, glances, nagios 等)"
+echo "  - 终端工具 (tmux, zsh, fzf, ripgrep 等)"
+echo "  - 逆向工程 (radare2, ghidra, binwalk 等)"
+echo "  - 取证工具 (autopsy, volatility, testdisk 等)"
+echo ""
+echo "查看已安装包数量："
+echo "  dpkg -l | grep '^ii' | wc -l"
+echo ""

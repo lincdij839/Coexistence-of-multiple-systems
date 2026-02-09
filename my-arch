@@ -40,35 +40,30 @@ else
     # 在新终端窗口中打开
     case "$TERMINAL" in
         gnome-terminal)
-            gnome-terminal --title="Arch Linux Container" -- bash -c "echo '正在进入容器: my-arch'; lxc exec my-arch -- /bin/bash" 2>/dev/null &
+            gnome-terminal --title="Arch Linux Container" -- bash -c "lxc exec my-arch -- /bin/bash" 2>/dev/null &
             ;;
         konsole)
-            konsole --title "Arch Linux Container" -e bash -c "echo '正在进入容器: my-arch'; lxc exec my-arch -- /bin/bash" 2>/dev/null &
+            konsole --title "Arch Linux Container" -e bash -c "lxc exec my-arch -- /bin/bash" 2>/dev/null &
             ;;
         xfce4-terminal)
-            xfce4-terminal --title="Arch Linux Container" -e "bash -c \"echo '正在进入容器: my-arch'; lxc exec my-arch -- /bin/bash\"" 2>/dev/null &
+            xfce4-terminal --title="Arch Linux Container" -e "bash -c \"lxc exec my-arch -- /bin/bash\"" 2>/dev/null &
             ;;
         tilix)
-            tilix --title="Arch Linux Container" -e "bash -c \"echo '正在进入容器: my-arch'; lxc exec my-arch -- /bin/bash\"" 2>/dev/null &
+            tilix --title="Arch Linux Container" -e "bash -c \"lxc exec my-arch -- /bin/bash\"" 2>/dev/null &
             ;;
         terminator)
-            terminator --title="Arch Linux Container" -e "bash -c \"echo '正在进入容器: my-arch'; lxc exec my-arch -- /bin/bash\"" 2>/dev/null &
+            terminator --title="Arch Linux Container" -e "bash -c \"lxc exec my-arch -- /bin/bash\"" 2>/dev/null &
             ;;
         mate-terminal)
-            mate-terminal --title="Arch Linux Container" -e "bash -c \"echo '正在进入容器: my-arch'; lxc exec my-arch -- /bin/bash\"" 2>/dev/null &
+            mate-terminal --title="Arch Linux Container" -e "bash -c \"lxc exec my-arch -- /bin/bash\"" 2>/dev/null &
             ;;
         lxterminal)
-            lxterminal --title="Arch Linux Container" -e "bash -c \"echo '正在进入容器: my-arch'; lxc exec my-arch -- /bin/bash\"" 2>/dev/null &
+            lxterminal --title="Arch Linux Container" -e "bash -c \"lxc exec my-arch -- /bin/bash\"" 2>/dev/null &
             ;;
         xterm)
-            xterm -title "Arch Linux Container" -e bash -c "echo '正在进入容器: my-arch'; lxc exec my-arch -- /bin/bash" 2>/dev/null &
+            xterm -title "Arch Linux Container" -e bash -c "lxc exec my-arch -- /bin/bash" 2>/dev/null &
             ;;
     esac
     
-    if [ $? -eq 0 ]; then
-        echo "✓ 已在新终端窗口中打开 my-arch 容器"
-    else
-        echo "✗ 打开新终端失败，在当前终端运行"
-        lxc exec my-arch -- /bin/bash
-    fi
+    echo "✓ 已在新终端窗口中打开 my-arch 容器"
 fi

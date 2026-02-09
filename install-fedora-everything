@@ -1,0 +1,156 @@
+#!/bin/bash
+
+# Fedora 完整开发工具集安装脚本
+# 包含所有开发、安全、网络工具
+
+echo "========================================"
+echo "  Fedora 完整工具集安装"
+echo "========================================"
+echo ""
+
+# 检查是否在 Fedora 容器中
+if ! grep -q "fedora" /etc/os-release 2>/dev/null; then
+    echo "❌ 错误: 此脚本只能在 Fedora 中运行"
+    echo "请使用: lxc exec my-fedora -- bash /usr/local/share/lxd-multi-system/install-fedora-everything"
+    exit 1
+fi
+
+# 检查是否为 root
+if [ "$EUID" -ne 0 ]; then
+    echo "❌ 请使用 root 权限运行此脚本"
+    exit 1
+fi
+
+echo "【1/8】更新系统..."
+dnf update -y
+
+echo ""
+echo "【2/8】安装开发工具组..."
+dnf groupinstall -y "Development Tools"
+dnf groupinstall -y "C Development Tools and Libraries"
+dnf groupinstall -y "Development Libraries"
+dnf groupinstall -y "RPM Development Tools"
+
+echo ""
+echo "【3/8】安装编程语言和运行时..."
+# Python 全家桶
+dnf install -y python3 python3-pip python3-devel python3-virtualenv python3-setuptools
+dnf install -y python3-numpy python3-scipy python3-pandas python3-matplotlib
+dnf install -y python3-requests python3-flask python3-django
+
+# Node.js 和 JavaScript
+dnf install -y nodejs npm yarn
+npm install -g typescript ts-node @types/node
+npm install -g webpack webpack-cli babel-cli
+npm install -g eslint prettier
+
+# Java
+dnf install -y java-latest-openjdk java-latest-openjdk-devel maven gradle
+
+# Go
+dnf install -y golang
+
+# Rust
+dnf install -y rust cargo
+
+# Ruby
+dnf install -y ruby ruby-devel rubygems
+gem install bundler rails
+
+# PHP
+dnf install -y php php-cli php-fpm php-mysqlnd php-pdo php-gd php-mbstring php-xml php-json
+dnf install -y composer
+
+# Perl
+dnf install -y perl perl-CPAN perl-core
+
+echo ""
+echo "【4/8】安装数据库..."
+dnf install -y mariadb mariadb-server
+dnf install -y postgresql postgresql-server postgresql-contrib
+dnf install -y redis mongodb-org
+dnf install -y sqlite
+
+echo ""
+echo "【5/8】安装 Web 服务器..."
+dnf install -y nginx httpd
+dnf install -y lighttpd
+
+echo ""
+echo "【6/8】安装网络和安全工具..."
+# 网络工具
+dnf install -y nmap wireshark tcpdump netcat socat
+dnf install -y net-tools bind-utils traceroute mtr
+dnf install -y iftop nethogs iptraf-ng
+dnf install -y curl wget aria2 axel
+
+# 安全工具
+dnf install -y openssl gnutls-utils
+dnf install -y john hydra aircrack-ng
+dnf install -y nikto sqlmap metasploit-framework
+dnf install -y lynis rkhunter chkrootkit
+dnf install -y fail2ban aide tripwire
+
+# 渗透测试工具
+dnf install -y burp-suite zaproxy
+dnf install -y ettercap-gtk bettercap
+dnf install -y hashcat hashcat-utils
+
+echo ""
+echo "【7/8】安装系统工具..."
+# 版本控制
+dnf install -y git git-lfs subversion mercurial
+
+# 容器和虚拟化
+dnf install -y docker podman buildah skopeo
+dnf install -y vagrant virtualbox-guest-additions
+
+# 监控工具
+dnf install -y htop glances atop
+dnf install -y sysstat dstat iotop
+dnf install -y nagios-plugins collectd
+
+# 文本编辑器和 IDE
+dnf install -y vim neovim emacs nano
+dnf install -y code # VS Code
+
+# 终端工具
+dnf install -y tmux screen byobu
+dnf install -y zsh fish
+dnf install -y fzf ripgrep fd-find bat exa
+
+# 压缩工具
+dnf install -y zip unzip p7zip p7zip-plugins
+dnf install -y tar gzip bzip2 xz
+
+# 其他实用工具
+dnf install -y tree jq yq
+dnf install -y strace ltrace lsof
+dnf install -y valgrind gdb lldb
+dnf install -y ansible terraform packer
+
+echo ""
+echo "【8/8】清理和优化..."
+dnf autoremove -y
+dnf clean all
+
+echo ""
+echo "========================================"
+echo "  ✓ Fedora 完整工具集安装完成！"
+echo "========================================"
+echo ""
+echo "已安装的主要工具类别："
+echo "  - 开发工具组 (gcc, make, autotools 等)"
+echo "  - 编程语言 (Python, Node.js, Java, Go, Rust, Ruby, PHP)"
+echo "  - 数据库 (MariaDB, PostgreSQL, Redis, MongoDB, SQLite)"
+echo "  - Web 服务器 (Nginx, Apache, Lighttpd)"
+echo "  - 网络工具 (nmap, wireshark, tcpdump 等)"
+echo "  - 安全工具 (john, hydra, metasploit, burp-suite 等)"
+echo "  - 版本控制 (git, svn, mercurial)"
+echo "  - 容器工具 (docker, podman, buildah)"
+echo "  - 监控工具 (htop, glances, nagios 等)"
+echo "  - 终端工具 (tmux, zsh, fzf, ripgrep 等)"
+echo ""
+echo "查看已安装包数量："
+echo "  dnf list installed | wc -l"
+echo ""
