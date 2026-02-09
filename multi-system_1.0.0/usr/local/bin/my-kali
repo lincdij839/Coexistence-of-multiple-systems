@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# 进入 my-kali 容器
+echo "正在进入容器: my-kali"
+lxc exec my-kali -- /bin/bash

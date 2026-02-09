@@ -1,0 +1,25 @@
+Package: multi-system
+Version: 1.0.0
+Architecture: all
+Maintainer: Yuan <yuan@example.com>
+Depends: bash (>= 4.0)
+Recommends: lxd (>= 5.0) | snapd
+Filename: debian-repo/pool/main/multi-system_1.0.0.deb
+Size: 13594
+MD5sum: 575a7e96662a20a6602a5f1aacfc7e8c
+SHA1: 4a9424d378a5f7823fb3672e5270beb9858f9ef4
+SHA256: c47a7f0c69c86288275756b6346c4a71f223420c41ea56e42ef628c3684e2e77
+Section: utils
+Priority: optional
+Homepage: https://github.com/yourusername/lxd-multi-system
+Description: LXD 多系统容器管理工具
+ 提供便捷的 LXD 容器管理，包括：
+ .
+ - 4个预配置容器：Arch Linux, Debian, Fedora, Kali Linux
+ - 快速进入命令：my-arch, my-debian, my-fedora, my-kali
+ - 完整的容器管理工具
+ - 资源限制管理
+ - 快照和备份功能
+ - 开发工具安装脚本
+ - 交互式菜单界面
+

@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "正在停止所有运行中的容器..."
+echo ""
+
+for container in my-arch my-debian my-fedora my-kali; do
+    status=$(lxc list "$container" -c s --format csv 2>/dev/null)
+    if [ "$status" = "RUNNING" ]; then
+        echo "停止: $container"
+        lxc stop "$container"
+    fi
+done
+
+echo ""
+echo "✓ 所有容器已停止"

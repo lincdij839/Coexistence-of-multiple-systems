@@ -1,0 +1,9 @@
+Origin: Multi-System
+Label: Multi-System
+Suite: stable
+Codename: stable
+Version: 1.0
+Architectures: amd64 all
+Components: main
+Description: LXD Multi-System APT Repository
+Date: Sun, 09 Feb 2026 08:00:00 UTC

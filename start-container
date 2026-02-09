@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo "用法: start-container <容器名>"
+    echo "可用容器: my-arch, my-debian, my-fedora, my-kali"
+    exit 1
+fi
+
+echo "正在启动容器: $1"
+lxc start "$1"
+echo "容器 $1 已启动"

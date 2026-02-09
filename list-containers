@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# 列出所有容器及其状态
+echo "=== LXD 容器状态 ==="
+lxc list --format table
+
+echo ""
+echo "=== 资源使用情况 ==="
+for container in my-arch my-debian my-fedora my-kali; do
+    if lxc info "$container" &>/dev/null; then
+        status=$(lxc list "$container" -c s --format csv)
+        if [ "$status" = "RUNNING" ]; then
+            mem=$(lxc info "$container" | grep "Memory usage:" | awk '{print $3, $4}')
+            cpu=$(lxc info "$container" | grep "CPU usage:" | awk '{print $3, $4}')
+            echo "[$container] 内存: $mem | CPU: $cpu"
+        fi
+    fi
+done

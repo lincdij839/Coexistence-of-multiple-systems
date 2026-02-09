@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# 进入 my-debian 容器
+echo "正在进入容器: my-debian"
+lxc exec my-debian -- /bin/bash

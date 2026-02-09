@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "用法: restore-snapshot <容器名> <快照名>"
+    echo ""
+    echo "查看可用快照:"
+    echo "  lxc info <容器名>"
+    exit 1
+fi
+
+CONTAINER=$1
+SNAPSHOT=$2
+
+echo "警告: 这将恢复容器 $CONTAINER 到快照 $SNAPSHOT"
+echo "当前状态将丢失！"
+read -p "确认继续? (yes/no): " confirm
+
+if [ "$confirm" = "yes" ]; then
+    echo "正在恢复快照..."
+    lxc restore "$CONTAINER" "$SNAPSHOT"
+    echo "✓ 快照已恢复"
+else
+    echo "已取消"
+fi

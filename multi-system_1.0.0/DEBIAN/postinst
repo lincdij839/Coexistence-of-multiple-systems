@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+echo ""
+echo "================================"
+echo "  multi-system 安装完成"
+echo "================================"
+echo ""
+echo "下一步："
+echo "  1. 确保在 lxd 组: sudo usermod -aG lxd \$USER"
+echo "  2. 重新登录或运行: newgrp lxd"
+echo "  3. 初始化容器: multi-system-setup"
+echo ""
+echo "快速使用："
+echo "  my-arch, my-debian, my-fedora, my-kali"
+echo ""
+echo "文档: /usr/local/share/doc/lxd-multi-system/"
+echo ""
+
+exit 0

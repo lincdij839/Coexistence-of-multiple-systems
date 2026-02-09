@@ -1,0 +1,17 @@
+#!/bin/bash
+
+BACKUP_DIR="./containers-backup-$(date +%Y%m%d)"
+
+echo "正在备份所有容器到: $BACKUP_DIR"
+mkdir -p "$BACKUP_DIR"
+
+for container in my-arch my-debian my-fedora my-kali; do
+    if lxc info "$container" &>/dev/null; then
+        echo "备份: $container"
+        lxc export "$container" "$BACKUP_DIR/$container.tar.gz" --compression gzip
+    fi
+done
+
+echo ""
+echo "✓ 备份完成: $BACKUP_DIR"
+du -sh "$BACKUP_DIR"

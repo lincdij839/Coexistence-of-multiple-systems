@@ -1,0 +1,122 @@
+#!/bin/bash
+
+# 列出 Kali 容器中已安装的工具
+
+CONTAINER="my-kali"
+
+if ! lxc info "$CONTAINER" &>/dev/null; then
+    echo "错误: 容器 $CONTAINER 不存在"
+    exit 1
+fi
+
+status=$(lxc list "$CONTAINER" -c s --format csv)
+if [ "$status" != "RUNNING" ]; then
+    echo "容器未运行，正在启动..."
+    lxc start "$CONTAINER"
+    sleep 3
+fi
+
+echo "================================"
+echo "  Kali Linux 工具清单"
+echo "================================"
+echo ""
+
+lxc exec "$CONTAINER" -- bash -c '
+# 检查已安装的 Kali 工具包
+echo "已安装的工具包:"
+echo ""
+dpkg -l | grep "^ii.*kali-" | awk "{print \"  ✓\", \$2}" | sort
+
+echo ""
+echo "================================"
+echo "  常用工具状态"
+echo "================================"
+echo ""
+
+# 信息收集
+echo "【信息收集】"
+for tool in nmap masscan dnsenum dnsrecon fierce nikto whatweb; do
+    if command -v $tool &>/dev/null; then
+        echo "  ✓ $tool"
+    else
+        echo "  ✗ $tool"
+    fi
+done
+
+echo ""
+echo "【漏洞扫描】"
+for tool in nessus openvas nikto wpscan; do
+    if command -v $tool &>/dev/null || dpkg -l | grep -q $tool 2>/dev/null; then
+        echo "  ✓ $tool"
+    else
+        echo "  ✗ $tool"
+    fi
+done
+
+echo ""
+echo "【Web 应用】"
+for tool in burpsuite sqlmap dirb gobuster wfuzz zaproxy; do
+    if command -v $tool &>/dev/null || dpkg -l | grep -q $tool 2>/dev/null; then
+        echo "  ✓ $tool"
+    else
+        echo "  ✗ $tool"
+    fi
+done
+
+echo ""
+echo "【密码攻击】"
+for tool in hydra john hashcat medusa ncrack; do
+    if command -v $tool &>/dev/null; then
+        echo "  ✓ $tool"
+    else
+        echo "  ✗ $tool"
+    fi
+done
+
+echo ""
+echo "【无线攻击】"
+for tool in aircrack-ng reaver wifite bully; do
+    if command -v $tool &>/dev/null; then
+        echo "  ✓ $tool"
+    else
+        echo "  ✗ $tool"
+    fi
+done
+
+echo ""
+echo "【漏洞利用】"
+for tool in msfconsole searchsploit; do
+    if command -v $tool &>/dev/null; then
+        echo "  ✓ $tool (Metasploit)"
+    else
+        echo "  ✗ $tool"
+    fi
+done
+
+echo ""
+echo "【网络工具】"
+for tool in wireshark tcpdump netcat socat; do
+    if command -v $tool &>/dev/null || command -v nc &>/dev/null; then
+        echo "  ✓ $tool"
+    else
+        echo "  ✗ $tool"
+    fi
+done
+
+echo ""
+echo "【后渗透】"
+for tool in mimikatz crackmapexec evil-winrm bloodhound; do
+    if command -v $tool &>/dev/null || dpkg -l | grep -q $tool 2>/dev/null; then
+        echo "  ✓ $tool"
+    else
+        echo "  ✗ $tool"
+    fi
+done
+
+echo ""
+echo "================================"
+echo ""
+echo "查看详细信息:"
+echo "  apt list --installed | grep kali"
+echo "  dpkg -l | grep kali"
+'

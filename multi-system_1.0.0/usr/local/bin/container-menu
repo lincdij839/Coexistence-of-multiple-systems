@@ -1,0 +1,93 @@
+#!/bin/bash
+
+while true; do
+    clear
+    echo "================================"
+    echo "    LXD 容器管理菜单"
+    echo "================================"
+    echo ""
+    echo "1. 列出所有容器"
+    echo "2. 进入容器"
+    echo "3. 启动容器"
+    echo "4. 停止容器"
+    echo "5. 创建快照"
+    echo "6. 查看资源使用"
+    echo "7. 停止所有容器"
+    echo "0. 退出"
+    echo ""
+    read -p "请选择 [0-7]: " choice
+    
+    case $choice in
+        1)
+            echo ""
+            lxc list
+            read -p "按回车继续..."
+            ;;
+        2)
+            echo ""
+            echo "可用容器:"
+            echo "  1) my-arch"
+            echo "  2) my-debian"
+            echo "  3) my-fedora"
+            echo "  4) my-kali"
+            read -p "选择容器 [1-4]: " num
+            case $num in
+                1) lxc exec my-arch -- /bin/bash ;;
+                2) lxc exec my-debian -- /bin/bash ;;
+                3) lxc exec my-fedora -- /bin/bash ;;
+                4) lxc exec my-kali -- /bin/bash ;;
+            esac
+            ;;
+        3)
+            echo ""
+            read -p "容器名: " container
+            lxc start "$container"
+            read -p "按回车继续..."
+            ;;
+        4)
+            echo ""
+            read -p "容器名: " container
+            lxc stop "$container"
+            read -p "按回车继续..."
+            ;;
+        5)
+            echo ""
+            read -p "容器名: " container
+            snapshot_name=$(date +%Y%m%d-%H%M%S)
+            lxc snapshot "$container" "$snapshot_name"
+            echo "快照已创建: $snapshot_name"
+            read -p "按回车继续..."
+            ;;
+        6)
+            echo ""
+            lxc list --format table
+            echo ""
+            for c in my-arch my-debian my-fedora my-kali; do
+                if [ "$(lxc list $c -c s --format csv)" = "RUNNING" ]; then
+                    echo "=== $c ==="
+                    lxc info "$c" | grep -E "Memory usage|CPU usage"
+                    echo ""
+                fi
+            done
+            read -p "按回车继续..."
+            ;;
+        7)
+            echo ""
+            read -p "确认停止所有容器? (yes/no): " confirm
+            if [ "$confirm" = "yes" ]; then
+                for c in my-arch my-debian my-fedora my-kali; do
+                    lxc stop "$c" 2>/dev/null && echo "已停止: $c"
+                done
+            fi
+            read -p "按回车继续..."
+            ;;
+        0)
+            echo "再见！"
+            exit 0
+            ;;
+        *)
+            echo "无效选择"
+            sleep 1
+            ;;
+    esac
+done

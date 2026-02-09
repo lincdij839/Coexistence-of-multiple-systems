@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+
+echo "正在卸载 multi-system..."
+echo "注意: 容器和数据不会被删除"
+echo "如需删除容器，请手动运行: lxc delete <容器名> --force"
+
+exit 0

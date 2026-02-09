@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# 进入 my-fedora 容器
+echo "正在进入容器: my-fedora"
+lxc exec my-fedora -- /bin/bash

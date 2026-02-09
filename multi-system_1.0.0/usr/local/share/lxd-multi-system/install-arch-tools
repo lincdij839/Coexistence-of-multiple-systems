@@ -1,0 +1,218 @@
+#!/bin/bash
+
+# Arch Linux 开发工具完整安装脚本
+
+CONTAINER="my-arch"
+
+echo "================================"
+echo "  Arch Linux 工具安装"
+echo "================================"
+echo ""
+
+# 检查容器状态
+if ! lxc info "$CONTAINER" &>/dev/null; then
+    echo "错误: 容器 $CONTAINER 不存在"
+    exit 1
+fi
+
+status=$(lxc list "$CONTAINER" -c s --format csv)
+if [ "$status" != "RUNNING" ]; then
+    echo "启动容器..."
+    lxc start "$CONTAINER"
+    sleep 3
+fi
+
+echo "请选择安装方案:"
+echo ""
+echo "1. 完整开发环境 (所有语言和工具) - 约 4GB"
+echo "2. Web 开发 (Node.js, Python, PHP, Nginx) - 约 1.5GB"
+echo "3. 系统开发 (C/C++, Go, Rust) - 约 1GB"
+echo "4. Python 开发 (Python, pip, 常用库) - 约 600MB"
+echo "5. 容器开发 (Docker, Podman) - 约 400MB"
+echo ""
+read -p "请选择 [1-5]: " choice
+
+case $choice in
+    1)
+        echo ""
+        echo "安装完整开发环境..."
+        lxc exec "$CONTAINER" -- bash -c '
+            # 更新系统
+            pacman -Syu --noconfirm
+            
+            # 基础开发工具
+            pacman -S --noconfirm \
+                base-devel \
+                git \
+                curl \
+                wget \
+                vim \
+                nano \
+                htop \
+                tmux \
+                zsh \
+                cmake \
+                gdb \
+                valgrind \
+                strace
+            
+            # Python
+            pacman -S --noconfirm \
+                python \
+                python-pip \
+                python-virtualenv
+            
+            # Node.js
+            pacman -S --noconfirm \
+                nodejs \
+                npm
+            
+            # Go
+            pacman -S --noconfirm go
+            
+            # Rust
+            pacman -S --noconfirm \
+                rust \
+                cargo
+            
+            # PHP
+            pacman -S --noconfirm \
+                php \
+                php-fpm \
+                composer
+            
+            # Web 服务器
+            pacman -S --noconfirm \
+                nginx \
+                apache
+            
+            # 数据库
+            pacman -S --noconfirm \
+                mariadb \
+                postgresql \
+                redis
+            
+            # 容器工具
+            pacman -S --noconfirm \
+                docker \
+                docker-compose
+            
+            # Java
+            pacman -S --noconfirm \
+                jdk-openjdk \
+                maven
+            
+            # Ruby
+            pacman -S --noconfirm \
+                ruby
+            
+            # Python 包
+            pip install --break-system-packages \
+                requests flask django fastapi \
+                numpy pandas pytest black pylint 2>/dev/null || true
+            
+            # npm 全局包
+            npm install -g \
+                yarn typescript eslint prettier nodemon 2>/dev/null || true
+            
+            # 清理
+            pacman -Scc --noconfirm
+        '
+        ;;
+    2)
+        echo ""
+        echo "安装 Web 开发环境..."
+        lxc exec "$CONTAINER" -- bash -c '
+            pacman -Syu --noconfirm
+            
+            pacman -S --noconfirm \
+                base-devel git curl wget vim \
+                nginx \
+                nodejs npm \
+                python python-pip \
+                php composer \
+                mariadb postgresql redis
+            
+            pip install --break-system-packages \
+                flask django fastapi requests 2>/dev/null || true
+            
+            npm install -g \
+                yarn typescript eslint prettier nodemon 2>/dev/null || true
+            
+            pacman -Scc --noconfirm
+        '
+        ;;
+    3)
+        echo ""
+        echo "安装系统开发环境..."
+        lxc exec "$CONTAINER" -- bash -c '
+            pacman -Syu --noconfirm
+            
+            pacman -S --noconfirm \
+                base-devel \
+                git cmake gdb valgrind strace \
+                go \
+                rust cargo \
+                clang lldb \
+                vim tmux
+            
+            pacman -Scc --noconfirm
+        '
+        ;;
+    4)
+        echo ""
+        echo "安装 Python 开发环境..."
+        lxc exec "$CONTAINER" -- bash -c '
+            pacman -Syu --noconfirm
+            
+            pacman -S --noconfirm \
+                python python-pip python-virtualenv \
+                git vim
+            
+            pip install --break-system-packages \
+                requests flask django fastapi \
+                numpy pandas matplotlib jupyter \
+                pytest black pylint mypy 2>/dev/null || true
+            
+            pacman -Scc --noconfirm
+        '
+        ;;
+    5)
+        echo ""
+        echo "安装容器开发环境..."
+        lxc exec "$CONTAINER" -- bash -c '
+            pacman -Syu --noconfirm
+            
+            pacman -S --noconfirm \
+                docker docker-compose \
+                podman buildah \
+                git vim
+            
+            systemctl enable docker
+            
+            pacman -Scc --noconfirm
+        '
+        ;;
+    *)
+        echo "无效选择"
+        exit 1
+        ;;
+esac
+
+echo ""
+echo "================================"
+echo "  安装完成！"
+echo "================================"
+echo ""
+echo "验证安装:"
+lxc exec "$CONTAINER" -- bash -c '
+    echo ""
+    for tool in gcc python node go rustc php docker nginx; do
+        if command -v $tool &>/dev/null; then
+            echo "  ✓ $tool"
+        fi
+    done
+'
+
+echo ""
+echo "进入容器: my-arch"

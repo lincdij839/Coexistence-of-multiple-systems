@@ -1,0 +1,21 @@
+# LXD 容器数据
+buckets/
+containers/
+containers-snapshots/
+custom/
+custom-snapshots/
+images/
+virtual-machines/
+virtual-machines-snapshots/
+
+# 备份文件
+containers-backup-*/
+*.tar.gz
+
+# IDE
+.idea/
+*.iml
+
+# 临时文件
+*.tmp
+*.log

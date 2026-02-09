@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# 为容器设置资源限制，避免单个容器占用过多资源
+
+if [ -z "$1" ]; then
+    echo "用法: set-limits <容器名> [内存MB] [CPU核心数]"
+    echo "示例: set-limits my-fedora 512 1"
+    echo ""
+    echo "预设配置:"
+    echo "  set-limits <容器名> light   # 256MB内存, 1核CPU"
+    echo "  set-limits <容器名> medium  # 512MB内存, 2核CPU"
+    echo "  set-limits <容器名> heavy   # 1GB内存, 2核CPU"
+    exit 1
+fi
+
+CONTAINER=$1
+PRESET=$2
+
+case $PRESET in
+    light)
+        MEM="256MB"
+        CPU="1"
+        ;;
+    medium)
+        MEM="512MB"
+        CPU="2"
+        ;;
+    heavy)
+        MEM="1024MB"
+        CPU="2"
+        ;;
+    *)
+        MEM="${2:-512}MB"
+        CPU="${3:-1}"
+        ;;
+esac
+
+echo "为容器 $CONTAINER 设置限制:"
+echo "  内存: $MEM"
+echo "  CPU: $CPU 核"
+
+lxc config set "$CONTAINER" limits.memory "$MEM"
+lxc config set "$CONTAINER" limits.cpu "$CPU"
+
+echo "✓ 限制已设置"

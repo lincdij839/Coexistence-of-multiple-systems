@@ -1,0 +1,185 @@
+#!/bin/bash
+
+# 从宿主机为 Kali 容器安装工具
+
+CONTAINER="my-kali"
+
+echo "================================"
+echo "  Kali Linux 工具安装"
+echo "================================"
+echo ""
+
+# 检查容器是否存在
+if ! lxc info "$CONTAINER" &>/dev/null; then
+    echo "错误: 容器 $CONTAINER 不存在"
+    exit 1
+fi
+
+# 检查容器是否运行
+status=$(lxc list "$CONTAINER" -c s --format csv)
+if [ "$status" != "RUNNING" ]; then
+    echo "容器未运行，正在启动..."
+    lxc start "$CONTAINER"
+    sleep 3
+fi
+
+echo "请选择安装方案:"
+echo ""
+echo "1. 完整工具集 (kali-linux-everything) - 约 15GB, 需要 1-2 小时"
+echo "2. 大型工具集 (kali-linux-large) - 约 9GB, 需要 30-60 分钟"
+echo "3. 默认工具集 (kali-linux-default) - 约 3.5GB, 需要 15-30 分钟"
+echo "4. 核心工具 (kali-linux-core) - 约 1.5GB, 需要 10 分钟"
+echo "5. 常用渗透测试工具 (推荐) - 约 2GB"
+echo "6. 自定义安装"
+echo ""
+read -p "请选择 [1-6]: " choice
+
+case $choice in
+    1)
+        echo ""
+        echo "⚠️  警告: 这将下载和安装约 15GB 的工具"
+        read -p "确认继续? (y/n): " confirm
+        if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+            echo "已取消"
+            exit 0
+        fi
+        
+        echo "正在安装完整工具集..."
+        echo "注意: 如果遇到依赖冲突，将尝试跳过问题包..."
+        lxc exec "$CONTAINER" -- bash -c "
+            apt update
+            # 先尝试正常安装
+            if ! DEBIAN_FRONTEND=noninteractive apt install -y kali-linux-everything 2>/dev/null; then
+                echo ''
+                echo '检测到依赖冲突，尝试使用 --fix-broken 修复...'
+                apt --fix-broken install -y
+                # 再次尝试，允许跳过有问题的包
+                DEBIAN_FRONTEND=noninteractive apt install -y --allow-downgrades kali-linux-everything || {
+                    echo ''
+                    echo '⚠️  完整安装失败，改为安装大型工具集...'
+                    DEBIAN_FRONTEND=noninteractive apt install -y kali-linux-large
+                }
+            fi
+        "
+        ;;
+    2)
+        echo "正在安装大型工具集..."
+        lxc exec "$CONTAINER" -- bash -c "
+            apt update
+            DEBIAN_FRONTEND=noninteractive apt install -y kali-linux-large || {
+                echo '尝试修复依赖...'
+                apt --fix-broken install -y
+                DEBIAN_FRONTEND=noninteractive apt install -y --allow-downgrades kali-linux-large
+            }
+        "
+        ;;
+    3)
+        echo "正在安装默认工具集..."
+        lxc exec "$CONTAINER" -- bash -c "
+            apt update
+            DEBIAN_FRONTEND=noninteractive apt install -y kali-linux-default || {
+                echo '尝试修复依赖...'
+                apt --fix-broken install -y
+                DEBIAN_FRONTEND=noninteractive apt install -y kali-linux-default
+            }
+        "
+        ;;
+    4)
+        echo "正在安装核心工具..."
+        lxc exec "$CONTAINER" -- bash -c "apt update && DEBIAN_FRONTEND=noninteractive apt install -y kali-linux-core"
+        ;;
+    5)
+        echo "正在安装常用渗透测试工具..."
+        lxc exec "$CONTAINER" -- bash -c "
+            apt update
+            DEBIAN_FRONTEND=noninteractive apt install -y \
+                kali-tools-information-gathering \
+                kali-tools-vulnerability \
+                kali-tools-web \
+                kali-tools-passwords \
+                kali-tools-exploitation \
+                nmap \
+                metasploit-framework \
+                sqlmap \
+                nikto \
+                dirb \
+                gobuster \
+                hydra \
+                john \
+                hashcat \
+                burpsuite \
+                zaproxy \
+                wpscan \
+                enum4linux \
+                smbclient \
+                netcat-traditional \
+                socat \
+                tcpdump \
+                wireshark \
+                aircrack-ng \
+                reaver \
+                bettercap \
+                responder \
+                impacket-scripts \
+                crackmapexec \
+                evil-winrm \
+                powershell-empire \
+                bloodhound \
+                mimikatz \
+                searchsploit
+        "
+        ;;
+    6)
+        echo ""
+        echo "可用的工具分类包:"
+        echo ""
+        echo "  kali-tools-information-gathering  # 信息收集"
+        echo "  kali-tools-vulnerability          # 漏洞分析"
+        echo "  kali-tools-web                    # Web 应用测试"
+        echo "  kali-tools-database               # 数据库测试"
+        echo "  kali-tools-passwords              # 密码攻击"
+        echo "  kali-tools-wireless               # 无线攻击"
+        echo "  kali-tools-reverse-engineering    # 逆向工程"
+        echo "  kali-tools-exploitation           # 漏洞利用"
+        echo "  kali-tools-social-engineering     # 社会工程"
+        echo "  kali-tools-sniffing-spoofing      # 嗅探/欺骗"
+        echo "  kali-tools-post-exploitation      # 后渗透"
+        echo "  kali-tools-forensics              # 取证"
+        echo ""
+        read -p "输入要安装的包名 (空格分隔): " packages
+        
+        if [ -n "$packages" ]; then
+            echo "正在安装: $packages"
+            lxc exec "$CONTAINER" -- bash -c "apt update && DEBIAN_FRONTEND=noninteractive apt install -y $packages"
+        else
+            echo "未选择任何包"
+            exit 1
+        fi
+        ;;
+    *)
+        echo "无效选择"
+        exit 1
+        ;;
+esac
+
+echo ""
+echo "================================"
+echo "  安装完成！"
+echo "================================"
+echo ""
+echo "验证安装的工具:"
+lxc exec "$CONTAINER" -- bash -c '
+    echo ""
+    echo "常用工具检查:"
+    for tool in nmap metasploit sqlmap nikto hydra john burpsuite wireshark aircrack-ng; do
+        if command -v $tool &>/dev/null || dpkg -l | grep -q $tool; then
+            echo "  ✓ $tool"
+        else
+            echo "  ✗ $tool"
+        fi
+    done
+'
+
+echo ""
+echo "进入容器: my-kali"
+echo "查看所有工具: apt list --installed | grep kali"

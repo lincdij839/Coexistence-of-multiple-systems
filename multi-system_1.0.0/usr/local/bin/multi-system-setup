@@ -1,0 +1,94 @@
+#!/bin/bash
+
+echo "================================"
+echo "  LXD 多系统容器初始化"
+echo "================================"
+echo ""
+
+if [ "$EUID" -eq 0 ]; then
+    echo "⚠️  请不要使用 root 或 sudo 运行"
+    echo "使用方法: multi-system-setup"
+    exit 1
+fi
+
+if ! command -v lxc &>/dev/null; then
+    echo "❌ LXD 未安装"
+    echo "安装: sudo snap install lxd"
+    exit 1
+fi
+
+if ! lxc list &>/dev/null; then
+    echo "❌ 没有 LXD 权限"
+    echo "请重新登录或运行: newgrp lxd"
+    exit 1
+fi
+
+WORK_DIR="$HOME/多系统"
+mkdir -p "$WORK_DIR"
+cd "$WORK_DIR"
+
+echo "工作目录: $WORK_DIR"
+echo ""
+
+if ! lxc storage list | grep -q "duoxitong"; then
+    echo "创建存储池: duoxitong"
+    lxc storage create duoxitong dir source="$WORK_DIR"
+fi
+
+create_container() {
+    local name=$1
+    local image=$2
+    local desc=$3
+    
+    if lxc info "$name" &>/dev/null; then
+        echo "✓ $name 已存在"
+        return
+    fi
+    
+    echo "创建容器: $name ($desc)"
+    lxc launch "$image" "$name" -s duoxitong
+    sleep 2
+    
+    echo "  等待网络..."
+    for i in {1..30}; do
+        if lxc exec "$name" -- ping -c 1 8.8.8.8 &>/dev/null 2>&1; then
+            break
+        fi
+        sleep 1
+    done
+    
+    echo "  ✓ $name 创建完成"
+}
+
+echo "开始创建容器..."
+echo ""
+
+create_container "my-arch" "images:archlinux" "Arch Linux"
+create_container "my-debian" "images:debian/12" "Debian 12"
+create_container "my-fedora" "images:fedora/39" "Fedora 39"
+create_container "my-kali" "images:kali" "Kali Linux"
+
+echo ""
+echo "设置资源限制..."
+set-limits my-arch 1024 2
+set-limits my-debian 512 2
+set-limits my-fedora 1024 2
+set-limits my-kali 1024 2
+
+echo ""
+echo "创建初始快照..."
+for container in my-arch my-debian my-fedora my-kali; do
+    snapshot-container "$container" "initial-setup"
+done
+
+echo ""
+echo "================================"
+echo "  ✓ 初始化完成！"
+echo "================================"
+echo ""
+echo "可用命令："
+echo "  my-arch, my-debian, my-fedora, my-kali"
+echo ""
+echo "管理工具："
+echo "  container-menu, list-containers, check-containers"
+echo ""

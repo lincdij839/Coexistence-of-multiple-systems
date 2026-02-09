@@ -1,0 +1,15 @@
+#!/bin/bash
+
+if [ -z "$1" ] || [ -z "$2" ]; then
+    echo "用法: copy-to-container <容器名> <本地文件/目录> [容器内路径]"
+    echo "示例: copy-to-container my-fedora ./file.txt /root/"
+    exit 1
+fi
+
+CONTAINER=$1
+SOURCE=$2
+DEST=${3:-/root/}
+
+echo "正在复制 $SOURCE 到容器 $CONTAINER:$DEST"
+lxc file push -r "$SOURCE" "$CONTAINER$DEST"
+echo "✓ 复制完成"

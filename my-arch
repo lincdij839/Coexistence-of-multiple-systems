@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# 进入 my-arch 容器
+echo "正在进入容器: my-arch"
+lxc exec my-arch -- /bin/bash

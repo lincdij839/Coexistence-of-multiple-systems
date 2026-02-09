@@ -1,0 +1,179 @@
+#!/bin/bash
+
+# 检查所有容器的完整性
+
+echo "================================"
+echo "  容器完整性检查"
+echo "================================"
+echo ""
+
+containers=(
+    "my-arch:Arch Linux:滚动更新"
+    "my-debian:Debian:稳定开发"
+    "my-fedora:Fedora:最新特性"
+    "my-kali:Kali Linux:安全测试"
+)
+
+for container_info in "${containers[@]}"; do
+    IFS=':' read -r name os purpose <<< "$container_info"
+    
+    echo "【$name】 - $os ($purpose)"
+    echo "----------------------------------------"
+    
+    # 检查容器是否存在
+    if ! lxc info "$name" &>/dev/null; then
+        echo "  ❌ 容器不存在"
+        echo ""
+        continue
+    fi
+    
+    # 检查运行状态
+    status=$(lxc list "$name" -c s --format csv)
+    if [ "$status" = "RUNNING" ]; then
+        echo "  ✓ 状态: 运行中"
+    else
+        echo "  ⚠️  状态: $status"
+    fi
+    
+    # 检查已安装的开发工具
+    echo "  工具检查:"
+    
+    if [ "$status" = "RUNNING" ]; then
+        # 检查常用工具
+        tools_to_check=""
+        case $name in
+            "my-kali")
+                tools_to_check="nmap metasploit sqlmap nikto hydra john"
+                ;;
+            "my-arch"|"my-debian"|"my-fedora")
+                tools_to_check="gcc python3 node go rustc php"
+                ;;
+            "minimal-alpine")
+                tools_to_check="apk sh"
+                ;;
+        esac
+        
+        if [ -n "$tools_to_check" ]; then
+            for tool in $tools_to_check; do
+                if lxc exec "$name" -- sh -c "command -v $tool &>/dev/null || command -v msfconsole &>/dev/null && [ '$tool' = 'metasploit' ]" 2>/dev/null; then
+                    echo "    ✓ $tool"
+                else
+                    echo "    ✗ $tool (未安装)"
+                fi
+            done
+        fi
+    else
+        echo "    (容器未运行，无法检查)"
+    fi
+    
+    # 检查快照
+    snapshot_info=$(lxc info "$name" 2>/dev/null | grep -A 100 "Snapshots:" | tail -n +2 | grep -v "^$" | wc -l)
+    if [ "$snapshot_info" -gt 0 ]; then
+        echo "  ✓ 快照: 已创建 ($snapshot_info 个)"
+    else
+        echo "  ⚠️  快照: 未创建 (建议: snapshot-container $name backup)"
+    fi
+    
+    # 检查资源限制
+    mem_limit=$(lxc config get "$name" limits.memory 2>/dev/null)
+    cpu_limit=$(lxc config get "$name" limits.cpu 2>/dev/null)
+    
+    if [ -n "$mem_limit" ] || [ -n "$cpu_limit" ]; then
+        echo "  ✓ 资源限制: 内存=${mem_limit:-无限制} CPU=${cpu_limit:-无限制}"
+    else
+        echo "  ⚠️  资源限制: 未设置 (建议: set-limits $name medium)"
+    fi
+    
+    echo ""
+done
+
+echo "================================"
+echo "  建议操作"
+echo "================================"
+echo ""
+
+# 检查哪些容器需要安装工具
+echo "需要安装工具的容器:"
+for container_info in "${containers[@]}"; do
+    IFS=':' read -r name os purpose <<< "$container_info"
+    
+    if ! lxc info "$name" &>/dev/null; then
+        continue
+    fi
+    
+    status=$(lxc list "$name" -c s --format csv)
+    if [ "$status" != "RUNNING" ]; then
+        continue
+    fi
+    
+    # 检查是否已安装工具
+    needs_install=false
+    case $name in
+        "my-kali")
+            if ! lxc exec "$name" -- sh -c "command -v nmap &>/dev/null" 2>/dev/null; then
+                echo "  • $name: fix-kali-install"
+                needs_install=true
+            fi
+            ;;
+        "my-arch")
+            if ! lxc exec "$name" -- sh -c "command -v gcc &>/dev/null" 2>/dev/null; then
+                echo "  • $name: install-arch-tools"
+                needs_install=true
+            fi
+            ;;
+        "my-debian")
+            if ! lxc exec "$name" -- sh -c "command -v gcc &>/dev/null" 2>/dev/null; then
+                echo "  • $name: install-debian-tools"
+                needs_install=true
+            fi
+            ;;
+        "my-fedora")
+            if ! lxc exec "$name" -- sh -c "command -v gcc &>/dev/null" 2>/dev/null; then
+                echo "  • $name: install-fedora-tools"
+                needs_install=true
+            fi
+            ;;
+    esac
+done
+
+echo ""
+echo "需要创建快照的容器:"
+for container_info in "${containers[@]}"; do
+    IFS=':' read -r name os purpose <<< "$container_info"
+    
+    if ! lxc info "$name" &>/dev/null; then
+        continue
+    fi
+    
+    snapshot_info=$(lxc info "$name" 2>/dev/null | grep -A 100 "Snapshots:" | tail -n +2 | grep -v "^$" | wc -l)
+    if [ "$snapshot_info" -eq 0 ]; then
+        echo "  • snapshot-container $name backup"
+    fi
+done
+
+echo ""
+echo "需要设置资源限制的容器:"
+for container_info in "${containers[@]}"; do
+    IFS=':' read -r name os purpose <<< "$container_info"
+    
+    if ! lxc info "$name" &>/dev/null; then
+        continue
+    fi
+    
+    mem_limit=$(lxc config get "$name" limits.memory 2>/dev/null)
+    if [ -z "$mem_limit" ]; then
+        case $name in
+            "minimal-alpine")
+                echo "  • set-limits $name light"
+                ;;
+            "my-kali"|"my-arch"|"my-fedora")
+                echo "  • set-limits $name 1024 2"
+                ;;
+            "my-debian")
+                echo "  • set-limits $name medium"
+                ;;
+        esac
+    fi
+done
+
+echo ""

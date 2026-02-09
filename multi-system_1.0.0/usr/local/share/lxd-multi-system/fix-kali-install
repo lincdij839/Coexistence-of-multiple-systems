@@ -1,0 +1,107 @@
+#!/bin/bash
+
+# 修复 Kali 工具安装问题
+
+CONTAINER="my-kali"
+
+echo "================================"
+echo "  修复 Kali 工具安装"
+echo "================================"
+echo ""
+
+# 检查容器状态
+status=$(lxc list "$CONTAINER" -c s --format csv)
+if [ "$status" != "RUNNING" ]; then
+    echo "启动容器..."
+    lxc start "$CONTAINER"
+    sleep 3
+fi
+
+echo "正在修复依赖问题并安装工具..."
+echo ""
+
+lxc exec "$CONTAINER" -- bash -c '
+# 更新软件源
+apt update
+
+# 修复损坏的包
+apt --fix-broken install -y
+
+# 尝试安装 kali-linux-large（不包含有问题的 wifi-coconut）
+echo "安装 kali-linux-large（避免依赖冲突）..."
+DEBIAN_FRONTEND=noninteractive apt install -y kali-linux-large
+
+# 如果还是失败，安装核心工具包
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "尝试安装核心工具包..."
+    DEBIAN_FRONTEND=noninteractive apt install -y \
+        kali-linux-core \
+        kali-tools-information-gathering \
+        kali-tools-vulnerability \
+        kali-tools-web \
+        kali-tools-passwords \
+        kali-tools-exploitation \
+        kali-tools-sniffing-spoofing
+fi
+
+# 单独安装常用工具
+echo ""
+echo "安装常用工具..."
+DEBIAN_FRONTEND=noninteractive apt install -y \
+    nmap \
+    masscan \
+    nikto \
+    dirb \
+    gobuster \
+    sqlmap \
+    hydra \
+    john \
+    hashcat \
+    burpsuite \
+    zaproxy \
+    wireshark \
+    tcpdump \
+    aircrack-ng \
+    netcat-traditional \
+    socat \
+    enum4linux \
+    smbclient \
+    wpscan \
+    whatweb \
+    searchsploit
+
+# 安装 Metasploit（可能需要较长时间）
+echo ""
+echo "安装 Metasploit Framework..."
+DEBIAN_FRONTEND=noninteractive apt install -y metasploit-framework
+
+# 初始化 Metasploit 数据库
+echo "初始化 Metasploit 数据库..."
+msfdb init 2>/dev/null || true
+
+# 清理
+apt autoremove -y
+apt clean
+
+echo ""
+echo "================================"
+echo "  安装完成！"
+echo "================================"
+'
+
+echo ""
+echo "验证安装..."
+lxc exec "$CONTAINER" -- bash -c '
+echo ""
+for tool in nmap metasploit sqlmap nikto hydra john burpsuite wireshark aircrack-ng; do
+    if command -v $tool &>/dev/null || command -v msfconsole &>/dev/null && [ "$tool" = "metasploit" ]; then
+        echo "  ✓ $tool"
+    else
+        echo "  ✗ $tool"
+    fi
+done
+'
+
+echo ""
+echo "完成！运行 'list-kali-tools' 查看详细信息"

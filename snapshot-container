@@ -1,0 +1,18 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo "用法: snapshot-container <容器名> [快照名]"
+    echo "如果不指定快照名，将使用时间戳"
+    exit 1
+fi
+
+CONTAINER=$1
+SNAPSHOT_NAME=${2:-$(date +%Y%m%d-%H%M%S)}
+
+echo "正在为容器 $CONTAINER 创建快照: $SNAPSHOT_NAME"
+lxc snapshot "$CONTAINER" "$SNAPSHOT_NAME"
+echo "✓ 快照已创建"
+
+echo ""
+echo "该容器的所有快照:"
+lxc info "$CONTAINER" | grep -A 100 "Snapshots:"
